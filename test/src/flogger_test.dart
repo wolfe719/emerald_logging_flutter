@@ -1,24 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
-import 'package:logging_flutter/logging_flutter.dart';
+import 'package:emerald_logging_flutter/emerald_logging_flutter.dart';
 
 void main() {
   group("Flogger", () {
     tearDown(() {
-      Flogger.clearListeners();
+      Elogger.clearListeners();
     });
-    test("captures logs emited with Flogger", () {
+    test("captures logs emitted with Flogger", () {
       final message = "Test message";
-      Flogger.registerListener((record) {
+      Elogger.registerListener((record) {
         expect(record.message, message);
         expect(record.level, Level.INFO);
       });
-      Flogger.i(message);
+      Elogger.info(message);
     });
-    test("captures logs emited outside of Flogger", () {
+    test("captures logs emitted outside of Flogger", () {
       final message = "Test message";
       final loggerName = "TestLogger";
-      Flogger.registerListener((record) {
+      Elogger.registerListener((record) {
         expect(record.message, message);
         expect(record.loggerName, loggerName);
         expect(record.level, Level.WARNING);
@@ -29,8 +29,8 @@ void main() {
       final message = "Test message";
       final loggerName1 = "TestLogger1";
       final loggerName2 = "TestLogger2";
-      List<FloggerRecord> logs = [];
-      Flogger.registerListener((record) {
+      List<EloggerRecord> logs = [];
+      Elogger.registerListener((record) {
         logs.add(record);
       });
       Logger(loggerName1).info(message);
@@ -47,13 +47,13 @@ void main() {
       final message = "Test message";
       final loggerName = "TestLogger";
       var count = 0;
-      Flogger.registerListener((record) {
+      Elogger.registerListener((record) {
         expect(record.message, message);
         expect(record.loggerName, loggerName);
         expect(record.level, Level.SEVERE);
         count++;
       });
-      Flogger.registerListener((record) {
+      Elogger.registerListener((record) {
         expect(record.message, message);
         expect(record.loggerName, loggerName);
         expect(record.level, Level.SEVERE);
@@ -63,26 +63,26 @@ void main() {
       expect(count, 2);
     });
     test("clears all listeners", () {
-      Flogger.registerListener((record) {
+      Elogger.registerListener((record) {
         fail("Should not be called");
       });
-      Flogger.clearListeners();
-      Flogger.i("message");
+      Elogger.clearListeners();
+      Elogger.info("message");
     });
     test("uses custom printer when provided", () {
       final printer = (record) {
         return "Custom printer: ${record.message}";
       };
-      Flogger.init(config: FloggerConfig(printer: printer));
-      Flogger.registerListener((record) {
+      Elogger.init(config: EloggerConfig(printer: printer));
+      Elogger.registerListener((record) {
         expect(record.printable(), "Custom printer: message");
       });
-      Flogger.i("message");
+      Elogger.info("message");
     });
     test("uses FloggerConfig when printer is not provided", () {
       final loggerName = "TestLogger";
-      Flogger.init(
-        config: FloggerConfig(
+      Elogger.init(
+        config: EloggerConfig(
           loggerName: loggerName,
           printClassName: false,
           printMethodName: false,
@@ -90,11 +90,11 @@ void main() {
           showDebugLogs: true,
         ),
       );
-      Flogger.registerListener((record) {
+      Elogger.registerListener((record) {
         print(record.printable());
         expect(record.printable(), "I/$loggerName: message");
       });
-      Flogger.i("message");
+      Elogger.info("message");
     });
   });
 }

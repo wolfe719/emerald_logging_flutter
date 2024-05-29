@@ -244,7 +244,9 @@ class _LogConsoleState extends State<LogConsole> {
             icon: Icon(Icons.remove),
             onPressed: () {
               setState(() {
-                _logFontSize--;
+                if (_logFontSize >= 2) {
+                  _logFontSize--;
+                }
               });
             },
           ),
@@ -287,7 +289,19 @@ class _LogConsoleState extends State<LogConsole> {
             value: _filterLevel,
             items: [
               DropdownMenuItem(
-                child: Text("DEBUG"),
+                child: Text("FINEST"),
+                value: Level.FINEST,
+              ),
+              DropdownMenuItem(
+                child: Text("FINER"),
+                value: Level.FINER,
+              ),
+              DropdownMenuItem(
+                child: Text("FINE"),
+                value: Level.FINE,
+              ),
+              DropdownMenuItem(
+                child: Text("CONFIG"),
                 value: Level.CONFIG,
               ),
               DropdownMenuItem(
@@ -299,8 +313,12 @@ class _LogConsoleState extends State<LogConsole> {
                 value: Level.WARNING,
               ),
               DropdownMenuItem(
-                child: Text("ERROR"),
+                child: Text("SEVERE"),
                 value: Level.SEVERE,
+              ),
+              DropdownMenuItem(
+                child: Text("SHOUT"),
+                value: Level.SHOUT,
               ),
             ],
             onChanged: (dynamic value) {
@@ -387,7 +405,10 @@ extension LevelExtension on Level {
       return Colors.red;
     } else if (this == Level.SHOUT) {
       return Colors.pinkAccent;
+    } else if ([Level.FINEST, Level.FINER, Level.FINE].contains(this)) {
+      return dark ? Colors.white60 : Colors.blueGrey;
     } else {
+      // ALL, NONE
       return dark ? Colors.white : Colors.black;
     }
   }

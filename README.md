@@ -1,6 +1,8 @@
 # Logging Flutter
 
-Flutter extension for the [logging](https://pub.dev/packages/logging) package.
+Flutter extension for the [logging](https://pub.dev/packages/logging) package and the [Logger Flutter](https://github.com/leisim/logger_flutter) package.
+
+Brings the ELogger class closer to the original logging class.
 
 ## Overview
 
@@ -18,19 +20,19 @@ This package provides a simple tool for logging messages in your applications an
 
 ### Initializing
 
-Use the [Flogger](lib/src/flogger.dart) static class to access all logging methods.
+Use the [ELogger](lib/src/elogger.dart) static class to access all logging methods.
 
 1. Initialize the logger.
 
     ```dart
-    Flogger.init();
+    ELogger.init();
     ```
 
 1. Register a listener to print logs to the developer console.
 
     ```dart
     if (kDebugMode){
-        Flogger.registerListener(
+        ELogger.registerListener(
             (record) => log(record.printable(), stackTrace: record.stackTrace),
         );
     }
@@ -41,30 +43,38 @@ Use the [Flogger](lib/src/flogger.dart) static class to access all logging metho
 Log messages with their severity using the following methods:
 
 ```dart
-Flogger.d("Debug message");
-Flogger.i("Info message");
-Flogger.w("Warning message");
-Flogger.e("Error message", stackTrace: null);
+ELogger.finest("Finest message");
+ELogger.finer("Finer message");
+ELogger.fine("Fine message");
+ELogger.config("Config message");
+ELogger.info("Info message");
+ELogger.warning("Warning message");
+ELogger.severe("Error message", stackTrace: null);
+ELogger.shout("Shout message", stackTrace: null);
 ```
 
 These calls will result in the logs below when using the default configuration:
 
 ```console
-[log] D/App SampleClass: Debug message
-[log] I/App SampleClass: Info message
-[log] W/App SampleClass: Warning message
-[log] E/App SampleClass: Error message
+[log] FZ/App SampleClass: Finest message
+[log] FP/App SampleClass: Finest message
+[log] FF/App SampleClass: Finest message
+[log] DD/App SampleClass: Config message
+[log] II/App SampleClass: Info message
+[log] WW/App SampleClass: Warning message
+[log] EE/App SampleClass: Severe message
+[log] EEEE/App SampleClass: Shout message
 ```
 
 ### Advanced Usage
 
 #### Configuration
 
-Use the [FloggerConfig](lib/src/flogger.dart) class when initializing the Flogger to configure how logs are printed:
+Use the [ELoggerConfig](lib/src/ELogger.dart) class when initializing the ELogger to configure how logs are printed:
 
 ```dart
-Flogger.init(config: FloggerConfig(...));
-FloggerConfig({
+ELogger.init(config: ELoggerConfig(...));
+ELoggerConfig({
     // The name of the default logger
     this.loggerName = "App",
     // Print the class name where the log was triggered
@@ -77,7 +87,7 @@ FloggerConfig({
     this.showDebugLogs = true,
     // Print logs with a custom format
     // If set, ignores all other print options
-    final FloggerPrinter? printer,
+    final ELoggerPrinter? printer,
 });
 ```
 
@@ -88,7 +98,7 @@ Use the [LogConsole](lib/src/log_console.dart) class to view your logs inside th
 1. Add logs to the console buffer by registering a new listener.
 
     ```dart
-    Flogger.registerListener(
+    ELogger.registerListener(
       (record) => LogConsole.add(
           OutputEvent(record.level, [record.printable()]),
           bufferSize: 1000, // Remember the last X logs
@@ -110,11 +120,13 @@ Use the [LogConsole](lib/src/log_console.dart) class to view your logs inside th
 
 #### Multiple Loggers
 
-Use the `loggerName` parameter when adding logs to print them as a different logger. This can be useful for differentiating calls made from the different layers in your app. For example:
+Use the `loggerName` parameter when adding logs to print them as a different logger. 
+This can be useful for differentiating calls made from the different layers in your app. 
+For example:
 
 ```dart
-    Flogger.i("Info message", loggerName: "Network");
-    Flogger.w("Warning message", loggerName: "Database");
+    ELogger.info("Info message", loggerName: "Network");
+    ELogger.warning("Warning message", loggerName: "Database");
 ```
 
 #### Logging to 3rd party services
@@ -123,7 +135,7 @@ Register additional listeners to send logs to different services, for example:
 
 ```dart
 if (kReleaseMode) {
-    Flogger.registerListener((record) {
+    ELogger.registerListener((record) {
         // Filter logs that may contain sensitive data
         if(record.loggerName != "App") return;
         if(record.message.contains("apiKey")) return;
@@ -154,6 +166,7 @@ Contributions are most welcome! Feel free to open a new issue or pull request to
 
 - [Logging](https://github.com/dart-lang/logging) - Copyright (c) 2013 the Dart project authors [BSD 3-Clause](https://github.com/dart-lang/logging/blob/master/LICENSE) for providing the logging framework this library depends on.
 - [Logger Flutter](https://github.com/leisim/logger_flutter) - Copyright (c) 2019 Simon Leier [MIT License](https://github.com/leisim/logger_flutter/blob/master/LICENSE) for creating the log console.
+- [Emerald_Logging_Flutter](https://github.com/wolfe719/emerald_logging_flutter) - Copyright (c) 2024 John Wolfe [MIT License](https://github.com/leisim/logger_flutter/blob/master/LICENSE) for creating the log console (closer to logging).
 
 ## License
 

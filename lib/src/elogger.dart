@@ -1,11 +1,11 @@
 import "package:logging/logging.dart";
 import 'package:stack_trace/stack_trace.dart';
 
-typedef FloggerPrinter = String Function(FloggerRecord record);
-typedef FloggerListener = void Function(FloggerRecord record);
+typedef EloggerPrinter = String Function(EloggerRecord record);
+typedef EloggerListener = void Function(EloggerRecord record);
 
 /// Configuration options for [LogRecord]
-class FloggerConfig {
+class EloggerConfig {
   /// The name for the default Logger
   final String loggerName;
 
@@ -23,9 +23,9 @@ class FloggerConfig {
 
   /// Print logs with a custom format
   /// If set, ignores all other print options
-  final FloggerPrinter? printer;
+  final EloggerPrinter? printer;
 
-  const FloggerConfig({
+  const EloggerConfig({
     this.loggerName = "App",
     this.printClassName = true,
     this.printMethodName = false,
@@ -36,13 +36,13 @@ class FloggerConfig {
 }
 
 /// Contains all the information about the [LogRecord]
-/// and can be printed with [printable] based on [FloggerConfig]
-class FloggerRecord {
+/// and can be printed with [printable] based on [EloggerConfig]
+class EloggerRecord {
   /// Original [LogRecord] from [Logger]
   final LogRecord logRecord;
 
   /// Print configuration
-  final FloggerConfig config;
+  final EloggerConfig config;
 
   /// [Logger] name
   final String loggerName;
@@ -65,7 +65,7 @@ class FloggerRecord {
   /// Method name where the log was triggered
   final String? methodName;
 
-  FloggerRecord._(
+  EloggerRecord._(
     this.logRecord,
     this.config,
     this.loggerName,
@@ -77,10 +77,10 @@ class FloggerRecord {
     this.methodName,
   );
 
-  /// Create a [FloggerRecord] from a [LogRecord]
-  factory FloggerRecord.fromLogger(
+  /// Create a [EloggerRecord] from a [LogRecord]
+  factory EloggerRecord.fromLogger(
     LogRecord record,
-    FloggerConfig config,
+    EloggerConfig config,
   ) {
     // Get ClassName and MethodName
     final classAndMethodNames = _getClassAndMethodNames(_getLogFrame()!);
@@ -95,7 +95,7 @@ class FloggerRecord {
     // Maybe add object
     if (record.object != null) message += " - ${record.object}";
     // Build Flogger record
-    return FloggerRecord._(
+    return EloggerRecord._(
       record,
       config,
       record.loggerName,
@@ -133,14 +133,26 @@ class FloggerRecord {
   }
 
   static String _levelShort(Level level) {
-    if (level == Level.CONFIG) {
-      return "D";
+    if (level == Level.ALL) {
+      return "AA";
+    } else if (level == Level.OFF) {
+      return "NO";
+    } else if (level == Level.FINEST) {
+      return "FZ";
+    } else if (level == Level.FINER) {
+      return "FP";
+    } else if (level == Level.FINE) {
+      return "FF";
+    } else if (level == Level.CONFIG) {
+      return "DD";
     } else if (level == Level.INFO) {
-      return "I";
+      return "II";
     } else if (level == Level.WARNING) {
-      return "W";
+      return "WW";
     } else if (level == Level.SEVERE) {
-      return "E";
+      return "EE";
+    } else if (level == Level.SHOUT) {
+      return "EEEE";
     } else {
       return "?";
     }
@@ -150,7 +162,7 @@ class FloggerRecord {
     try {
       // Capture the frame where the log originated from the current trace
       final loggingLibrary = "package:logging/src/logger.dart";
-      final loggingFlutterLibrary = "package:logging_flutter/src/flogger.dart";
+      final loggingFlutterLibrary = "package:logging_flutter/src/elogger.dart";
       final currentFrames = Trace.current().frames.toList();
       // Remove all frames from the logging_flutter library
       currentFrames
@@ -188,44 +200,79 @@ class FloggerRecord {
 
 /// Convenience singleton with static methods to
 /// interact with [Logger]
-/// Logs can be configured with [FloggerConfig]
-/// Logs can be listened to with [FloggerListener]
-abstract class Flogger {
-  static FloggerConfig _config = FloggerConfig();
+/// Logs can be configured with [EloggerConfig]
+/// Logs can be listened to with [EloggerListener]
+abstract class Elogger {
+  static EloggerConfig _config = EloggerConfig();
   static Logger _logger = Logger(_config.loggerName);
 
-  Flogger._();
+  Elogger._();
 
-  /// Initialize the default [Logger] and set the [FloggerConfig]
-  static void init({FloggerConfig config = const FloggerConfig()}) {
+  /// Initialize the default [Logger] and set the [EloggerConfig]
+  static void init({EloggerConfig config = const EloggerConfig()}) {
     _config = config;
     _logger = Logger(_config.loggerName);
     Logger.root.level = _config.showDebugLogs ? Level.ALL : Level.INFO;
   }
 
-  /// Log a DEBUG message with CONFIG [Level]
-  static d(String message, {String? loggerName}) => _log(
-        message,
-        loggerName: loggerName,
-        severity: Level.CONFIG,
-      );
+  /// Log a message with CONFIG [Level]
+  static finest(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.FINEST,
+    error: error,
+  );
 
-  /// Log an INFO message with INFO [Level]
-  static i(String message, {String? loggerName}) => _log(
-        message,
-        loggerName: loggerName,
-        severity: Level.INFO,
-      );
+  /// Log a message with CONFIG [Level]
+  static finer(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.FINER,
+    error: error,
+  );
 
-  /// Log a WARNING message with WARNING [Level]
-  static w(String message, {String? loggerName}) => _log(
-        message,
-        loggerName: loggerName,
-        severity: Level.WARNING,
-      );
+  /// Log a message with CONFIG [Level]
+  static fine(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.FINE,
+    error: error,
+  );
 
-  /// Log an ERROR message with SEVERE [Level]
-  static e(String message, {StackTrace? stackTrace, String? loggerName}) =>
+  /// Log a message with CONFIG [Level]
+  static config(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.CONFIG,
+    error: error,
+  );
+
+  /// Log a DEBUG message (with CONFIG [Level])
+  static debug(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.CONFIG,
+    error: error,
+  );
+
+  /// Log a message with INFO [Level]
+  static info(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.INFO, 
+    error: error,
+  );
+
+  /// Log a message with WARNING [Level]
+  static warning(String message, {String? loggerName, Error? error}) => _log(
+    message,
+    loggerName: loggerName,
+    severity: Level.WARNING,
+    error: error,
+  );
+
+  /// Log a message with SEVERE [Level]
+  static severe(String message, {StackTrace? stackTrace, String? loggerName}) =>
       _log(
         message,
         loggerName: loggerName,
@@ -233,26 +280,34 @@ abstract class Flogger {
         stackTrace: stackTrace,
       );
 
-  static void _log(
-    String message, {
-    String? loggerName,
-    required Level severity,
-    StackTrace? stackTrace,
-  }) {
+  /// Log a message with SHOUT [Level]
+  static shout(String message, {StackTrace? stackTrace, String? loggerName}) =>
+      _log(
+        message,
+        loggerName: loggerName,
+        severity: Level.SHOUT,
+        stackTrace: stackTrace,
+      );
+
+  static void _log(String message, 
+      { String? loggerName, 
+        required Level severity, 
+        Error? error, 
+        StackTrace? stackTrace, }) {
     if (loggerName == null) {
       // Main logger
-      _logger.log(severity, message, null, stackTrace);
+      _logger.log(severity, message, error, stackTrace);
     } else {
       // Additional loggers
-      Logger(loggerName)..log(severity, message, null, stackTrace);
+      Logger(loggerName)..log(severity, message, error, stackTrace);
     }
   }
 
   /// Register a listener to listen to all logs
-  /// Logs are emitted as [FloggerRecord]
-  static registerListener(FloggerListener onRecord) {
+  /// Logs are emitted as [EloggerRecord]
+  static registerListener(EloggerListener onRecord) {
     Logger.root.onRecord
-        .map((e) => FloggerRecord.fromLogger(e, _config))
+        .map((e) => EloggerRecord.fromLogger(e, _config))
         .listen(onRecord);
   }
 

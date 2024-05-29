@@ -43,3 +43,4 @@ coverage
 
 # Fluter version management
 **/.fvm/flutter_sdk
+**/.fvm/versions

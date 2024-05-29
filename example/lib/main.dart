@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:logging_flutter/logging_flutter.dart';
+import 'package:emerald_logging_flutter/emerald_logging_flutter.dart';
 
 class SampleClass {
   final String name;
@@ -16,23 +16,33 @@ class SampleClass {
   });
 
   static void printSomeLogs() {
-    Flogger.d("Debug message");
+    Elogger.finest("Finest message");
+    Elogger.finest("Finest message with object - ${SampleClass(name: "John", id: 1)}");
 
-    Flogger.i("Info message");
-    Flogger.i("Info message with object - ${SampleClass(name: "John", id: 1)}");
+    Elogger.finer("Finer message");
+    Elogger.finer("Finer message with object - ${SampleClass(name: "John", id: 1)}");
 
-    Flogger.w("Warning message");
+    Elogger.fine("Fine message");
+    Elogger.fine("Fine message with object - ${SampleClass(name: "John", id: 1)}");
+
+    Elogger.config("Config message");
+    Elogger.debug("Debug (Config) message");
+
+    Elogger.info("Info message");
+    Elogger.info("Info message with object - ${SampleClass(name: "John", id: 1)}");
+
+    Elogger.warning("Warning message");
     try {
       throw Exception("Something bad happened");
     } catch (e) {
-      Flogger.w("Warning message with exception $e");
+      Elogger.warning("Warning message with exception $e");
     }
 
-    Flogger.e("Error message with exception - ${Exception("Test Error")}");
+    Elogger.severe("Error message with exception - ${Exception("Test Error")}");
 
-    Flogger.i("Info message with a different logger name", loggerName: "Dio");
-
-    // throw Exception("This has been thrown");
+    Elogger.shout("Shout message!!!");
+    
+    Elogger.info("Info message with a different logger name", loggerName: "Dio");
   }
 }
 
@@ -65,14 +75,14 @@ void main() {
     init();
   }, (error, stack) {
     // Catch and log crashes
-    Flogger.e('Unhandled error - $error', stackTrace: stack);
+    Elogger.severe('Unhandled error - $error', stackTrace: stack);
   });
 }
 
 void init() {
   // Init
-  Flogger.init(
-    config: FloggerConfig(
+  Elogger.init(
+    config: EloggerConfig(
       printClassName: true,
       printMethodName: true,
       showDateTime: true,
@@ -81,12 +91,12 @@ void init() {
   );
   if (kDebugMode) {
     // Send logs to debug console
-    Flogger.registerListener(
+    Elogger.registerListener(
       (record) => log(record.printable(), stackTrace: record.stackTrace),
     );
   }
   // Send logs to App Console
-  Flogger.registerListener(
+  Elogger.registerListener(
     (record) => LogConsole.add(
       OutputEvent(record.level, [record.printable()]),
       bufferSize: 1000, // Remember the last X logs
@@ -94,7 +104,7 @@ void init() {
   );
   // You can also use "registerListener" to log to Crashlytics or any other services
   if (kReleaseMode) {
-    Flogger.registerListener((record) {
+    Elogger.registerListener((record) {
       // Filter logs that may contain sensitive data
       if (record.loggerName != "App") return;
       if (record.message.contains("apiKey")) return;
@@ -116,9 +126,13 @@ class MyApp extends StatelessWidget {
         "home": (context) => HomeWidget(),
       },
       initialRoute: "home",
-      theme: ThemeData.dark(),
+      theme: isDarkMode(context) ? ThemeData.dark() : ThemeData.light(),
     );
   }
+}
+
+bool isDarkMode(BuildContext context) {
+  return MediaQuery.of(context).platformBrightness == Brightness.dark;
 }
 
 class HomeWidget extends StatelessWidget {
@@ -133,7 +147,7 @@ class HomeWidget extends StatelessWidget {
               child: Text("Print some Logs")),
           TextButton(
               onPressed: () => ExternalPackage.printSomeLogs(),
-              child: Text("Print some non-flogger Logs")),
+              child: Text("Print some non-elogger Logs")),
           TextButton(
             onPressed: () async {
               await Future.delayed(Duration(milliseconds: 300));
@@ -144,7 +158,7 @@ class HomeWidget extends StatelessWidget {
           SizedBox(height: 16),
           Center(
             child: TextButton(
-                onPressed: () => LogConsole.open(context),
+                onPressed: () => LogConsole.open(context, dark: isDarkMode(context)),
                 child: Text("or click here to open Logs Console")),
           ),
         ],
