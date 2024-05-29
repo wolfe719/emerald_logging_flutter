@@ -21,6 +21,57 @@ class OutputEvent {
   OutputEvent(this.level, this.lines);
 }
 
+class RotatingLogConsole extends StatefulWidget {
+  final bool dark;
+  final bool showCloseButton;
+
+  late final LogConsole logConsole;
+
+  RotatingLogConsole({this.dark = false, this.showCloseButton = false, Key? key}) : super(key: key) {
+    logConsole = LogConsole(dark: dark, showCloseButton: showCloseButton);
+  }
+
+  static Future<void> open(BuildContext context, {bool? dark}) async {
+    var logConsole = RotatingLogConsole(
+      showCloseButton: true,
+      dark: dark ?? Theme.of(context).brightness == Brightness.dark,
+    );
+    PageRoute route;
+    if (Platform.isIOS) {
+      route = CupertinoPageRoute(builder: (_) => logConsole);
+    } else {
+      route = MaterialPageRoute(builder: (_) => logConsole);
+    }
+
+    await Navigator.push(context, route);
+  }
+
+  static void add(OutputEvent outputEvent, {int? bufferSize = 1000}) {
+    while (_outputEventBuffer.length >= (bufferSize ?? 1)) {
+      _outputEventBuffer.removeFirst();
+    }
+    _outputEventBuffer.add(outputEvent);
+  }
+
+  @override
+  State<RotatingLogConsole> createState() => _RotatingLogConsoleState();
+}
+
+class _RotatingLogConsoleState extends State<RotatingLogConsole> {
+  @override
+  Widget build(BuildContext context) {
+    return OrientationBuilder(
+        builder: (context, orientation) {
+          // Rotate the widget based on the current orientation
+          return RotatedBox(
+              quarterTurns: orientation == Orientation.landscape ? 1 : 0,
+              child: widget.logConsole,
+          );
+        }
+    );
+  }
+}
+
 class LogConsole extends StatefulWidget {
   final bool dark;
   final bool showCloseButton;

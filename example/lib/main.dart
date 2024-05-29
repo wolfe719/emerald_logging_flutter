@@ -159,7 +159,13 @@ class HomeWidget extends StatelessWidget {
           Center(
             child: TextButton(
                 onPressed: () => LogConsole.open(context, dark: isDarkMode(context)),
-                child: Text("or click here to open Logs Console")),
+                child: Text("Click here to open Logs Console")),
+          ),
+          SizedBox(height: 16),
+          Center(
+            child: TextButton(
+                onPressed: () => RotatingLogConsole.open(context, dark: isDarkMode(context)),
+                child: Text("or click here to open rotating Logs Console")),
           ),
         ],
       ),
